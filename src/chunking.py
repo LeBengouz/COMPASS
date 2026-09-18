@@ -5,14 +5,23 @@ import re
 # Chunking : split the document following Titles, parts etc.
 
 def split_per_paragraphs(markdown: str) -> list[str]:
-    # temporary simple function
     blocks = re.split(r"\n\s*\n", markdown)
     paragraphs = []
+    current_section = "Unknown section"
     for block in blocks:
         block = block.strip()
+        if not block:
+            continue
+        
+        # dernier titre de section
+        if re.match(r"^#{1,6}\s+", block):
+            current_section = re.sub(r"^#{1,6}\s+", "", block).strip()
+
+            continue
         if len(block) < 80:
             continue
-        paragraphs.append(block)
+        
+        paragraphs.append({"text": block, "section": current_section})
 
     return paragraphs
 
@@ -32,6 +41,6 @@ def create_chunks(paragraphs):
 
     chunks = []
     for index, paragraph in enumerate(paragraphs):
-        chunks.append({"id": index, "text": paragraph})
+        chunks.append({"id": index, "text": paragraph["text"], "section": paragraph["section"]})
 
     return chunks

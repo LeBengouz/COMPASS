@@ -67,15 +67,14 @@ for rank, index in enumerate(indices[0]):
     print("Text :", chunks[index]["text"][:500])
 # Problème : le 1er trouvé c'est exactement le même passage du coup
 
-print("==============================")
+print("====================")
 
 # Test passage matcher
 target_passage = """
 An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors.
 """
 
-chunk, score = find_target_chunk(target_passage, chunks
-)
+chunk, score = find_target_chunk(target_passage, chunks)
 
 print("\nBest matching chunk")
 print("Score :", score)

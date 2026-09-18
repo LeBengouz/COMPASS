@@ -12,6 +12,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def generate_prerequisite_map(
         target_passage: str,
         local_context: str,
+        section_context: str,
         semantic_context: str,
         background: str,
     ) -> PrerequisiteMap: 
@@ -23,8 +24,12 @@ def generate_prerequisite_map(
     LOCAL CONTEXT FROM THE PAPER 
     
     {local_context} 
+
+    CONTEXT FROM THE SAME SECTION
+
+    {section_context}
     
-    SEMANTICALLY RELATED PASSAGES FROM THE PAPER 
+    OTHER SEMANTICALLY RELATED PASSAGES FROM THE PAPER 
     
     {semantic_context} 
     
@@ -50,6 +55,8 @@ def generate_prerequisite_map(
             - Each prerequisite must include one checkpoint question.
             - Do not write a course.
             - Do not provide a detailed explanation of the target passage.
+            - Use source_type "explicit" only when the concept is directly mentioned in the provided paper context.
+            - Use source_type "inferred" when it is not explicitly stated but is required as prerequisite knowledge
 
             Concept naming rules: 
             - The "concept" field must contain the shortest standard name of the prerequisite concept.

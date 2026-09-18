@@ -2,6 +2,19 @@ import streamlit as st
 import tempfile
 
 from src.pdf_parser import pdf_to_markdown
+from src.chunking import split_per_paragraphs, create_chunks
+from src.embeddings import EmbeddingModel, VectorIndex
+from src.passage_matcher import find_target_chunk
+from src.retrieval import retrieve_context, transform_chunks_to_text
+from src.use_llm import generate_prerequisite_map
+
+@st.cache_resource
+def load_embedding_model():
+    return EmbeddingModel()
+
+
+embedding_model = load_embedding_model()
+
 
 st.set_page_config(
     page_title="COMPASS",
@@ -11,12 +24,12 @@ st.set_page_config(
 st.title("COMPASS")
 
 research_paper = st.file_uploader(
-    "1] Load the research paper to be studied",
+    "1. Load the research paper to be studied",
     type=["pdf"],
 )
 
 user_background = st.text_area(
-    "2] What knowledge do you already have in this field?",
+    "2. What knowledge do you already have in this field?",
     placeholder=(
         "Ex : linear algebra, probability, "
         "Classical ML; little deep learning"
@@ -24,16 +37,68 @@ user_background = st.text_area(
 )
 
 target_passage = st.text_area(
-    "3] Please, paste the passage you don't understand."
+    "3. Please, paste the passage you don't understand."
 )
 
 if st.button("Build my learning map"):
-    # 1. parser le PDF
-    # 2. créer des chunks
-    # 3. calculer les embeddings
-    # 4. retrouver le passage précis
-    # 5. récupérer le contexte (sémantique + spaciale)
-    # 6. appeler un LLM
-    # 7. afficher résultats selon la structure donnée
+    if not research_paper:
+        st.error("Please, upload a PDF first..")
+        st.stop()
 
-    pass
+    if not target_passage.strip():
+        st.error("Please, paste a passage to analyze..")
+        st.stop()
+
+    with st.spinner("Analyzing the paper...", show_time=True):
+        # 0. Save the uploaded PDF temporarily 
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf", ) as temp_file:
+            temp_file.write(research_paper.getvalue())
+            pdf_path = temp_file.name
+
+        # 1. parser le PDF
+        markdown = pdf_to_markdown(pdf_path)
+
+        # 2. créer des chunks
+        paragraphs = split_per_paragraphs(markdown)
+        chunks = create_chunks(paragraphs)
+
+        # 3. calculer les embeddings
+        texts = [chunk["text"] for chunk in chunks]
+        embeddings = embedding_model.encode(texts)
+        vector_index = VectorIndex(embeddings.shape[1])
+        vector_index.add(embeddings)
+
+        # 4. retrouver le passage cible précis
+        target_chunk, score = find_target_chunk(target_passage, chunks)
+
+
+        # 5. récupérer le contexte (sémantique + spaciale)
+        context = retrieve_context(
+            target_text=target_passage,
+            target_chunk=target_chunk,
+            chunks=chunks,
+            embedding_model=embedding_model,
+            vector_index=vector_index,
+        )
+        local_text = transform_chunks_to_text(context["local"])
+        section_text = transform_chunks_to_text(context["section"])
+        semantic_text = transform_chunks_to_text(context["semantic"])
+
+
+        # 6. appeler un LLM
+        result = generate_prerequisite_map(
+            target_passage=target_passage,
+            local_context=local_text,
+            section_context=section_text,
+            semantic_context=semantic_text,
+            background=user_background,
+        )
+
+        # 7. afficher résultats selon la structure donnée
+        # ToDO
+
+    st.success("Concept map generated")
+
+    st.json(
+        result.model_dump()
+    )
