@@ -19,6 +19,8 @@ def retrieve_context(target_text, target_chunk, chunks, embedding_model, vector_
     """
     Get strcutural AND semantic context
     semantic context = chunks talking of the same subject
+
+    ToDO : context using markdown titles ? (sections)
     """
     local_context = get_local_context(target_chunk["id"], chunks)
     query_embedding = embedding_model.encode([target_text])
