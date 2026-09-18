@@ -3,7 +3,6 @@ import tempfile
 
 from src.pdf_parser import pdf_to_markdown
 
-
 st.set_page_config(
     page_title="COMPASS",
     layout="wide",
@@ -12,22 +11,29 @@ st.set_page_config(
 st.title("COMPASS")
 
 research_paper = st.file_uploader(
-    "Charger le papier de recherche à étudier",
+    "1] Load the research paper to be studied",
     type=["pdf"],
 )
 
-if research_paper is not None:
-    with tempfile.NamedTemporaryFile(
-        delete=False,
-        suffix=".pdf"
-    ) as tmp:
+user_background = st.text_area(
+    "2] What knowledge do you already have in this field?",
+    placeholder=(
+        "Ex : linear algebra, probability, "
+        "Classical ML; little deep learning"
+    )
+)
 
-        tmp.write(research_paper.getvalue())
-        pdf_path = tmp.name
+target_passage = st.text_area(
+    "3] Please, paste the passage you don't understand."
+)
 
-    research_paper_markdown = pdf_to_markdown(pdf_path)
+if st.button("Build my learning map"):
+    # 1. parser le PDF
+    # 2. créer des chunks
+    # 3. calculer les embeddings
+    # 4. retrouver le passage précis
+    # 5. récupérer le contexte (sémantique + spaciale)
+    # 6. appeler un LLM
+    # 7. afficher résultats selon la structure donnée
 
-    st.success("PDF correctement chargé")
-
-    with st.expander("Consulter le texte extrait"):
-        st.text(research_paper_markdown[:10000])
+    pass
