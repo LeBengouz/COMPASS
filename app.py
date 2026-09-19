@@ -108,3 +108,32 @@ if st.button("Build my learning map"):
     st.subheader("Your personalized prerequisite map")
 
     st.graphviz_chart(dot, use_container_width=True)
+
+    # Asking user to select a concept -> give exploration tips
+    concept_names = [prerequisite.concept for prerequisite in result.prerequisites]
+
+    selected_concept = st.selectbox("Explore a prerequisite", concept_names)
+    selected_prerequisite = next(
+        prerequisite
+        for prerequisite in result.prerequisites 
+        if prerequisite.concept == selected_concept
+    )
+
+    # Display the selected prerequisite
+    st.subheader(selected_prerequisite.concept)
+    
+    st.markdown("**Why is this concept usefull ?**")
+    st.write(selected_prerequisite.reason)
+
+    st.markdown("**Source**")
+    if selected_prerequisite.source_type == "explicit":
+        st.write("Explicitly mentioned in the paper.")
+    else:
+        st.write("Inferred prerequisite.")
+
+    st.markdown("**What should I search ?**")
+    for query in selected_prerequisite.search_queries:
+        st.write(f"- {query}")
+
+    st.markdown("**Checkpoint : Can you answer this question ?**")
+    st.info(selected_prerequisite.checkpoint)
