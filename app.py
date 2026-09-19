@@ -17,6 +17,9 @@ def load_embedding_model():
 
 embedding_model = load_embedding_model()
 
+if "prerequisite_map" not in st.session_state:
+    st.session_state.prerequisite_map = None
+
 
 st.set_page_config(
     page_title="COMPASS",
@@ -96,18 +99,27 @@ if st.button("Build my learning map"):
             background=user_background,
         )
 
-        # 7. afficher résultats selon la structure donnée
-        # ToDO
+        st.session_state.prerequisite_map = result
 
-    st.success("Concept map generated")
+        st.success("Learning map successfully generated !")
+
+if st.session_state.prerequisite_map is not None:
+    # Showing concept data
+    result = st.session_state.prerequisite_map
+
+    st.divider()
+
+    st.subheader("Your personalized prerequisite map")
 
     graph = build_prerequisite_graph(result)
     dot = graph_to_dot(graph, result.target)
 
-    st.success("Learning map successfully generated !")
-    st.subheader("Your personalized prerequisite map")
-
     st.graphviz_chart(dot, use_container_width=True)
+
+    # Exploration Concept
+    st.divider()
+    st.subheader("Explore the map")
+
 
     # Asking user to select a concept -> give exploration tips
     concept_names = [prerequisite.concept for prerequisite in result.prerequisites]
@@ -120,8 +132,8 @@ if st.button("Build my learning map"):
     )
 
     # Display the selected prerequisite
-    st.subheader(selected_prerequisite.concept)
-    
+    st.markdown(f"### {selected_prerequisite.concept}")
+
     st.markdown("**Why is this concept usefull ?**")
     st.write(selected_prerequisite.reason)
 
