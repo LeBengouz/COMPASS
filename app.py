@@ -7,7 +7,7 @@ from src.embeddings import EmbeddingModel, VectorIndex
 from src.passage_matcher import find_target_chunk
 from src.retrieval import retrieve_context, transform_chunks_to_text
 from src.use_llm import generate_prerequisite_map
-from src.graph_builder import build_prerequisite_graph, graph_to_dot
+from src.graph_builder import build_prerequisite_graph, graph_to_dot, dot_to_png_bytes
 
 
 @st.cache_resource
@@ -115,6 +115,11 @@ if st.session_state.prerequisite_map is not None:
     dot = graph_to_dot(graph, result.target)
 
     st.graphviz_chart(dot, use_container_width=True)
+    st.caption(
+    "Solid node: explicitly mentioned in the paper. "
+    "Dashed node: inferred prerequisite. "
+    "Arrows indicate learning dependencies."
+    )
 
     # Exploration Concept
     st.divider()
@@ -149,3 +154,10 @@ if st.session_state.prerequisite_map is not None:
 
     st.markdown("**Checkpoint : Can you answer this question ?**")
     st.info(selected_prerequisite.checkpoint)
+
+    st.divider()
+    st.subheader("Download your map")
+
+    png_bytes = dot_to_png_bytes(dot)
+
+    st.download_button(label="Download graph as PNG", data=png_bytes, file_name="compass_learning_map.png", mime="image/png")

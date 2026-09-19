@@ -1,4 +1,7 @@
 import networkx as nx
+import textwrap
+from graphviz import Source
+from io import BytesIO
 
 from src.models import PrerequisiteMap
 
@@ -51,18 +54,42 @@ def validate_graph(graph):
     return nx.is_directed_acyclic_graph(graph)
 
 
+def wrap_label(text: str, width: int = 28) -> str:
+    lines = textwrap.wrap(text, width=width)
+
+    return "\\n".join(lines)
+
+
 def graph_to_dot(graph, target_text):
 
     lines = [
         "digraph G {",
-        'rankdir="TB";',
-        'graph [pad="0.5", nodesep="0.6", ranksep="0.8"];',
-        'node [fontname="Arial"];',
-        'edge [fontname="Arial"];',
+        'rankdir="BT";',
+
+        # Global graph spacing
+        'graph [pad="0.5", nodesep="0.55", ranksep="0.8", bgcolor="transparent"];',
+
+        # Default node configuration
+        'node ['
+        'shape="box", '
+        'style="rounded,filled", '
+        'fontname="Arial", '
+        'fontsize="11", '
+        'margin="0.18,0.12"'
+        '];',
+
+        # Default edge configuration
+        'edge ['
+        'arrowsize="0.7", '
+        'penwidth="1.4"'
+        '];',
     ]
 
-    for node in graph.nodes:
+    for node, attributes in graph.nodes(data=True):
         if node == TARGET_ID:
+            target_label = wrap_label(target_text, width=45)
+            target_label = ("TARGET\\n\\n"+ target_label)
+
             label = target_text.replace(
                 '"',
                 '\\"'
@@ -70,21 +97,38 @@ def graph_to_dot(graph, target_text):
 
             lines.append(
                 f'"{TARGET_ID}" '
-                f'[label="{label}", '
+                f'['
+                f'label="{target_label}", '
                 f'shape="box", '
-                f'style="rounded,bold"];'
+                f'style="rounded,bold,filled", '
+                f'penwidth="2.2", '
+                f'margin="0.25,0.18"'
+                f'];'
             )
 
         else:
+            prerequisite = attributes.get("data")
+            label = wrap_label(node, width=24)
+
+
             label = node.replace(
                 '"',
                 '\\"'
             )
+
+            if (prerequisite and prerequisite.source_type == "inferred"):
+                style = ("rounded,dashed,filled")
+
+            else :
+                style = ("rounded,filled")
+
+
             lines.append(
                 f'"{node}" '
-                f'[label="{label}", '
-                f'shape="box", '
-                f'style="rounded"];'
+                f'['
+                f'label="{label}", '
+                f'style="{style}"'
+                f'];'
             )
 
     for source, destination in graph.edges:
@@ -93,3 +137,10 @@ def graph_to_dot(graph, target_text):
     lines.append("}")
 
     return "\n".join(lines)
+
+
+
+def dot_to_png_bytes(dot):
+    # Convert a DOT graph description to PNG bytes.
+    source = Source(dot)
+    return source.pipe(format="png")
