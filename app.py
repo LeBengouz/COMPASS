@@ -7,6 +7,8 @@ from src.embeddings import EmbeddingModel, VectorIndex
 from src.passage_matcher import find_target_chunk
 from src.retrieval import retrieve_context, transform_chunks_to_text
 from src.use_llm import generate_prerequisite_map
+from src.graph_builder import build_prerequisite_graph, graph_to_dot
+
 
 @st.cache_resource
 def load_embedding_model():
@@ -99,6 +101,10 @@ if st.button("Build my learning map"):
 
     st.success("Concept map generated")
 
-    st.json(
-        result.model_dump()
-    )
+    graph = build_prerequisite_graph(result)
+    dot = graph_to_dot(graph, result.target)
+
+    st.success("Learning map successfully generated !")
+    st.subheader("Your personalized prerequisite map")
+
+    st.graphviz_chart(dot, use_container_width=True)
