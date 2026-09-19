@@ -177,6 +177,6 @@ but rather:
 
 That's why COMPASS provides users with a **map** !!
 
-Cognitive science, and the learning sciences in particular, demonstrates that learners retain information better when they are actively engaged in the process of understanding; activities such as searching for information, drawing on existing knowledge, connecting concepts, or attempting to answer a question contribute more to learning than the passive reading of information.
+Cognitive science, and the learning sciences in particular, demonstrates that learners retain information better when they are **actively engaged in the process** of understanding; activities such as searching for information, drawing on existing knowledge, connecting concepts, or attempting to answer a question contribute more to learning than the passive reading of information.
 
-COMPASS follows this approach. The tool allows the learner to carry out the work of research and comprehension while providing guidance throughout the process.
+**COMPASS follows this approach**. The tool allows the learner to carry out the work of research and comprehension while providing guidance throughout the process.
