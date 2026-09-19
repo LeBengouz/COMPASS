@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo_COMPASS.png" alt="COMPASS logo" width="280">
+</p>
+
 # COMPASS
 
 **Concept Oriented Mapping of Prerequisites for Academic Scientific Sensemaking**

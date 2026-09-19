@@ -26,6 +26,8 @@ st.set_page_config(
     layout="wide",
 )
 
+st.image("assets/logo_COMPASS.png",width=440)
+
 st.title("COMPASS")
 
 research_paper = st.file_uploader(
